@@ -29,7 +29,7 @@ export default function Home() {
       document.documentElement.classList.remove('dark');
       localStorage.setItem('theme', 'light');
     }
-  }, [isDark, mounted]);
+  }, [isDark, mounted]); 
 
   const toggleTheme = () => setIsDark(prev => !prev);
 
