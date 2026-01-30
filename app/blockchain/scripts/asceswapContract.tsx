@@ -9,7 +9,7 @@ export const ASCE_SWAP_ADDRESS =
   "0x0123..."; // 👈 no literal typing
 
 export const asceSwap = new Contract({
-  abi:AsceSwapABI,
+  abi:AsceSwapABI as any,
   address:ASCE_SWAP_ADDRESS,
   providerOrAccount:provider
 });
