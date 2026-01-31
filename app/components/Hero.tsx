@@ -14,7 +14,6 @@ export const Hero: React.FC = () => {
     handleLogOut,
     setShowAuthFlow,
   } = useDynamicContext();
-  console.log(dynamicUser,'user')
 
   /* ----------------------------------------
      STEP 1 → clear stale sessions

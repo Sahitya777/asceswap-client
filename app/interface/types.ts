@@ -31,5 +31,61 @@ export type TokenSymbol = "STRK" | "USDC" | "ETH" | "BTC" | "USDT";
 export type SwapDirection = 'FIXED' | 'FLOATING';
 
 // interface/types.ts
-export type ProtocolSymbol = "Ekubo" | "Vesu" | "Nostra";
+export type ProtocolSymbol = "Ekubo" | "Vesu" | "Nostra" | "Asceswap";
+
+// interface/formattedMarket.ts
+
+export interface FormattedMarket {
+  pairId: number;
+  status: "ACTIVE" | "PAUSED";
+
+  oracle: string;           // hex address
+  curator: string;          // hex address
+  collateralToken: string;  // hex address
+  decimals: number;
+
+  rate: {
+    currentPct: number;
+    lastUpdated: Date;
+  };
+
+  pool: {
+    totalCollateral: number;
+    lockedFixed: number;
+    lockedFloating: number;
+    availableLiquidity: number;
+  };
+
+  params: {
+    liquidationThresholdPct: number;
+    initialMarginMultiplierPct: number;
+    minMarginFloorPct: number;
+
+    swapTermDays: number;
+    minHoldPeriodMinutes: number;
+
+    swapFeePct: number;
+    earlyExitFeePct: number;
+    liquidationBonusPct: number;
+    feeSpreadPct: number;
+
+    maxUtilizationPct: number;
+
+    minNotional: number;
+    maxNotional: number;
+
+    maxOracleStalenessSeconds: number;
+    maxRateChangePct: number;
+
+    minRatePct: number;
+    maxRatePct: number;
+
+    isLpPermissioned: boolean;
+  };
+
+  stats: {
+    totalSwaps: number;
+    activeSwaps: number;
+  };
+}
 

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { RefreshCw, Sun, Moon, ChevronDown, LogOut } from "lucide-react";
 import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
 import STRKLogo from "../assets/icons/coins/strk";
+import { MintMockTokenModal } from "./MintMockTokenModal";
 
 interface HeaderProps {
   isDark: boolean;
@@ -19,7 +20,7 @@ export const Header: React.FC<HeaderProps> = ({ isDark, toggleTheme }) => {
   const shortAddress = address
     ? `${address.slice(0, 5)}…${address.slice(-4)}`
     : "";
-
+  const [showMint, setShowMint] = useState(false);
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-black/5 dark:border-white/5 bg-white/80 dark:bg-[#050505]/80 backdrop-blur-md transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -38,6 +39,45 @@ export const Header: React.FC<HeaderProps> = ({ isDark, toggleTheme }) => {
 
         {/* Actions */}
         <div className="flex items-center gap-2 relative">
+<button
+  onClick={() => setShowMint(true)}
+  className="
+    relative group
+    px-4 py-2 rounded-full
+    text-xs font-black uppercase tracking-widest
+    text-indigo-600 dark:text-indigo-400
+    bg-indigo-500/10 dark:bg-indigo-500/15
+    border border-indigo-500/30
+    hover:border-indigo-500/60
+    hover:bg-indigo-500/20
+    transition-all duration-300
+    shadow-[0_0_0px_rgba(99,102,241,0.0)]
+    hover:shadow-[0_0_25px_rgba(99,102,241,0.45)]
+  "
+>
+  {/* Glow */}
+  <span
+    className="
+      absolute inset-0 rounded-full
+      bg-linear-to-r from-indigo-400/0 via-indigo-400/30 to-purple-400/0
+      opacity-0 group-hover:opacity-100
+      blur
+      transition-opacity duration-300
+    "
+  />
+
+  {/* Content */}
+  <span className="relative flex items-center gap-2">
+    <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+    Mint Test Tokens
+  </span>
+</button>
+
+
+          <MintMockTokenModal
+            isOpen={showMint}
+            onClose={() => setShowMint(false)}
+          />
           {/* Theme toggle */}
           <button
             onClick={toggleTheme}

@@ -6,11 +6,11 @@ export const provider = new RpcProvider({
 });
 
 export const ASCE_SWAP_ADDRESS =
-  "0x0123..."; // 👈 no literal typing
+    process.env.NEXT_PUBLIC_ASCESWAP_ADDRESS; // 👈 no literal typing
 
 export const asceSwap = new Contract({
   abi:AsceSwapABI as any,
-  address:ASCE_SWAP_ADDRESS,
+  address:ASCE_SWAP_ADDRESS as string,
   providerOrAccount:provider
 });
 

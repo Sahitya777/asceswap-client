@@ -16,28 +16,28 @@ export default function Home() {
 const MARKETS: MarketData[] = [
   { 
     id: '1', 
-    protocol: 'Ekubo', 
-    name: 'STRK/USDC LP Fees', 
-    oracleRate: 18.22, 
+    protocol: 'Asceswap',
+    name: 'MOCK USDC Supply Yield', 
+    oracleRate: 7.22, 
     fixedDuration: Duration.D1,
     maturityTimestamp: Date.now() + 1000 * 60 * 60 * 23 + 1000 * 60 * 45 // ~23h 45m
   },
-  { 
-    id: '2', 
-    protocol: 'Vesu', 
-    name: 'STRK Supply Yield', 
-    oracleRate: 8.04, 
-    fixedDuration: Duration.D7,
-    maturityTimestamp: Date.now() + 1000 * 60 * 60 * 24 * 6 + 1000 * 60 * 60 * 2 // ~6d 2h
-  },
-  { 
-    id: '3', 
-    protocol: 'Nostra', 
-    name: 'USDC Supply Yield', 
-    oracleRate: 12.15, 
-    fixedDuration: Duration.D30,
-    maturityTimestamp: Date.now() + 1000 * 60 * 60 * 24 * 29 // ~29d
-  },
+  // { 
+  //   id: '2', 
+  //   protocol: 'Vesu', 
+  //   name: 'STRK Supply Yield', 
+  //   oracleRate: 8.04, 
+  //   fixedDuration: Duration.D7,
+  //   maturityTimestamp: Date.now() + 1000 * 60 * 60 * 24 * 6 + 1000 * 60 * 60 * 2 // ~6d 2h
+  // },
+  // { 
+  //   id: '3', 
+  //   protocol: 'Nostra', 
+  //   name: 'USDC Supply Yield', 
+  //   oracleRate: 12.15, 
+  //   fixedDuration: Duration.D30,
+  //   maturityTimestamp: Date.now() + 1000 * 60 * 60 * 24 * 29 // ~29d
+  // },
 ];
 
   useEffect(() => {

@@ -1,16 +1,28 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { TrendingUp, TrendingDown, Info, Clock, Wallet } from "lucide-react";
-import { Duration, MarketData, SwapDirection } from "../interface/types";
+import { Duration, FormattedMarket, MarketData, ProtocolSymbol, SwapDirection } from "../interface/types";
 import { Dialog } from "./Dialog";
 import { SwapDialogContent } from "./SwapDialogContent";
 import { extractTokensFromName } from "../lib/helpers/helpers";
 import { TOKEN_LOGOS } from "../lib/helpers/tokenLogos";
 import { PROTOCOL_LOGOS } from "../lib/helpers/dappLogos";
 import { LiquidityDialogContent } from "./LiquidityDialogContent";
+import { DefaultProtocolLogo } from "../lib/helpers/DefaultProtocolLogo";
+import { getMarket } from "../blockchain/scripts/markets";
 
 interface SwapCardProps {
   market: MarketData;
 }
+
+export function getProtocolLogo(
+  protocol: ProtocolSymbol | string
+): React.FC<{ size?: number }> {
+  return (
+    PROTOCOL_LOGOS[protocol as ProtocolSymbol] ??
+    DefaultProtocolLogo
+  );
+}
+
 
 export const SwapCard: React.FC<SwapCardProps> = ({ market }) => {
   const [showSwapDialog, setShowSwapDialog] = useState(false);
@@ -18,9 +30,10 @@ export const SwapCard: React.FC<SwapCardProps> = ({ market }) => {
   const [activeDirection, setActiveDirection] =
     useState<SwapDirection>("FLOATING");
   const [timeLeft, setTimeLeft] = useState("");
-  const ProtocolIcon = PROTOCOL_LOGOS[market?.protocol];
+  const ProtocolIcon =  getProtocolLogo(market.protocol);
   const tokens = extractTokensFromName(market.name);
-
+    const [marketDetails, setMarketDetails] =
+  useState<FormattedMarket | null>(null);
   /* ---------------- Countdown ---------------- */
   useEffect(() => {
     const updateCountdown = () => {
@@ -54,6 +67,16 @@ export const SwapCard: React.FC<SwapCardProps> = ({ market }) => {
     return () => clearInterval(i);
   }, [market.maturityTimestamp]);
 
+  useEffect(()=>{
+    const fetchData=async()=>{
+        const res=await getMarket(market.id)
+        if(res){
+            setMarketDetails(res as any)
+        }
+    }
+    fetchData()
+  },[])
+
   /* ---------------- Pricing ---------------- */
   const impliedFixedRate = useMemo(() => {
     const termPremium =
@@ -63,8 +86,8 @@ export const SwapCard: React.FC<SwapCardProps> = ({ market }) => {
           ? 0.8
           : 1.6;
 
-    return market.oracleRate - termPremium;
-  }, [market.oracleRate, market.fixedDuration]);
+    return (marketDetails?.rate?.currentPct ?marketDetails?.rate?.currentPct:5) - termPremium;
+  }, [marketDetails?.rate?.currentPct, market.fixedDuration]);
 
   const handleOpenSwap = (direction: SwapDirection) => {
     setActiveDirection(direction);
@@ -124,7 +147,7 @@ export const SwapCard: React.FC<SwapCardProps> = ({ market }) => {
               </div>
 
               <div className="text-xs text-slate-400 font-medium">
-                Spot APR: {market.oracleRate.toFixed(2)}%
+                Spot APR: {marketDetails?.rate?.currentPct.toFixed(2)}%
               </div>
             </div>
           </div>
@@ -204,12 +227,14 @@ export const SwapCard: React.FC<SwapCardProps> = ({ market }) => {
           direction={activeDirection}
           duration={market.fixedDuration}
           onClose={() => setShowSwapDialog(false)}
+          marketDetails={marketDetails}
         />
       </Dialog>
             <Dialog isOpen={showLiquidityDialog} onClose={() => setShowLiquidityDialog(false)}>
         <LiquidityDialogContent 
           market={market}
           onClose={() => setShowLiquidityDialog(false)}
+          marketDetails={marketDetails}
         />
       </Dialog>
     </>

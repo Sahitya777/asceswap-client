@@ -1,0 +1,100 @@
+[
+  {
+    "type": "impl",
+    "name": "MockOracleImpl",
+    "interface_name": "asceswap_cairo::mocks::IMockOracle"
+  },
+  {
+    "type": "struct",
+    "name": "core::integer::u256",
+    "members": [
+      {
+        "name": "low",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "high",
+        "type": "core::integer::u128"
+      }
+    ]
+  },
+  {
+    "type": "enum",
+    "name": "core::bool",
+    "variants": [
+      {
+        "name": "False",
+        "type": "()"
+      },
+      {
+        "name": "True",
+        "type": "()"
+      }
+    ]
+  },
+  {
+    "type": "interface",
+    "name": "asceswap_cairo::mocks::IMockOracle",
+    "items": [
+      {
+        "type": "function",
+        "name": "get_rate",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "(core::integer::u256, core::integer::u64)"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "set_rate",
+        "inputs": [
+          {
+            "name": "rate_bps",
+            "type": "core::integer::u256"
+          },
+          {
+            "name": "timestamp",
+            "type": "core::integer::u64"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "set_stale",
+        "inputs": [
+          {
+            "name": "is_stale",
+            "type": "core::bool"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      }
+    ]
+  },
+  {
+    "type": "constructor",
+    "name": "constructor",
+    "inputs": [
+      {
+        "name": "initial_rate",
+        "type": "core::integer::u256"
+      },
+      {
+        "name": "initial_timestamp",
+        "type": "core::integer::u64"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "asceswap_cairo::mocks::MockOracle::Event",
+    "kind": "enum",
+    "variants": []
+  }
+]

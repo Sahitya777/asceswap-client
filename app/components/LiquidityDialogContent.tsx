@@ -11,29 +11,36 @@ import {
   Coins,
   BarChart3,
 } from "lucide-react";
-import { MarketData } from "../interface/types";
+import { FormattedMarket, MarketData } from "../interface/types";
 import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
 import { getTokenBalance } from "../blockchain/scripts/tokenBalance";
 import numberFormatter from "../blockchain/utils/numberFormatter";
 import { PROTOCOL_LOGOS } from "../lib/helpers/dappLogos";
+import { getProtocolLogo } from "./SwapCard";
+import { approveAndSupplyLp } from "../blockchain/scripts/write/approveAndSupplyLp";
 
 interface LiquidityDialogContentProps {
   market: MarketData;
   onClose: () => void;
+  marketDetails: FormattedMarket | null;
 }
 
 export const LiquidityDialogContent: React.FC<LiquidityDialogContentProps> = ({
   market,
   onClose,
+  marketDetails,
 }) => {
   const [amount, setAmount] = useState(0);
   const { primaryWallet } = useDynamicContext();
   const address = primaryWallet?.address;
-
+  const [loading, setLoading] = useState(false);
+  const [txHash, setTxHash] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const [balanceSymbol, setBalanceSymbol] = useState<string>("");
   const [loadingBalance, setLoadingBalance] = useState(false);
-    const ProtocolIcon = PROTOCOL_LOGOS[market?.protocol];
+  const ProtocolIcon = getProtocolLogo(market?.protocol);
+
   useEffect(() => {
     if (!address) {
       setWalletBalance(null);
@@ -47,13 +54,12 @@ export const LiquidityDialogContent: React.FC<LiquidityDialogContentProps> = ({
         setLoadingBalance(true);
 
         const res = await getTokenBalance(
-          "0x04718f5a0Fc34cC1AF16A1cdee98fFB20C31f5cD61D6Ab07201858f4287c938D", // 👈 token for this market
+          marketDetails?.collateralToken as string, // 👈 token for this market
           address as string,
         );
 
         if (!cancelled) {
           setWalletBalance(res.formatted);
-          setBalanceSymbol(res.symbol);
         }
       } catch (err) {
         console.error("Failed to fetch balance", err);
@@ -70,7 +76,27 @@ export const LiquidityDialogContent: React.FC<LiquidityDialogContentProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [address]);
+  }, [address, marketDetails?.collateralToken]);
+
+  const handleSupply = async () => {
+    try {
+      setLoading(true);
+      const txHash = await approveAndSupplyLp({
+        tokenAddress: marketDetails?.collateralToken as string,
+        asceSwapAddress: process.env.NEXT_PUBLIC_ASCESWAP_ADDRESS!,
+        pairId: String(marketDetails?.pairId),
+        amount: Number(amount),
+        decimals: marketDetails?.decimals as number,
+      });
+
+      setTxHash(txHash);
+    } catch (e: any) {
+      console.log(e, "supply error");
+      setError(e.message ?? "Transaction failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const maxAmount = walletBalance ?? 0;
 
@@ -136,7 +162,7 @@ export const LiquidityDialogContent: React.FC<LiquidityDialogContentProps> = ({
               POOL TVL <Info className="w-2.5 h-2.5 opacity-50" />
             </div>
             <div className="text-2xl font-mono font-bold text-white leading-none">
-              $4.2M
+              ${numberFormatter(marketDetails?.pool?.totalCollateral)}
             </div>
           </div>
           <div className="space-y-1">
@@ -152,7 +178,7 @@ export const LiquidityDialogContent: React.FC<LiquidityDialogContentProps> = ({
               BASE APY <TrendingUp className="w-2.5 h-2.5 text-emerald-400" />
             </div>
             <div className="text-2xl font-mono font-bold text-emerald-400 leading-none">
-              {displayYield.toFixed(2)}%
+              {marketDetails?.rate?.currentPct.toFixed(2)}%
             </div>
           </div>
         </div>
@@ -298,7 +324,14 @@ export const LiquidityDialogContent: React.FC<LiquidityDialogContentProps> = ({
             </p>
           </div>
         </div>
-
+                  {error && <div className="text-red-400 text-xs">{error}</div>}
+          {txHash && (
+            <div className="text-green-400 text-xs break-all">
+              Success
+              <br />
+              {txHash}
+            </div>
+          )}
         {/* Action Footer */}
         <div className="flex gap-4 pt-2">
           <button
@@ -307,8 +340,13 @@ export const LiquidityDialogContent: React.FC<LiquidityDialogContentProps> = ({
           >
             Cancel
           </button>
-          <button className="flex-1 py-5 rounded-2xl font-black uppercase tracking-[0.25em] text-[10px] bg-indigo-600 hover:bg-indigo-500 text-white shadow-2xl shadow-indigo-600/30 transition-all active:scale-95 flex items-center justify-center gap-3 group/btn">
-            Confirm Deposit
+          <button
+            className="flex-1 py-5 rounded-2xl font-black uppercase tracking-[0.25em] text-[10px] bg-indigo-600 hover:bg-indigo-500 text-white shadow-2xl shadow-indigo-600/30 transition-all active:scale-95 flex items-center justify-center gap-3 group/btn"
+            onClick={() => {
+              handleSupply();
+            }}
+          >
+            {loading?"Providing Liquidity...":"Confirm Deposit"}
             <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
           </button>
         </div>

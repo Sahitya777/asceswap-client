@@ -1,9 +1,11 @@
 import { uint256 } from "starknet";
 import { SwapSide, u256ToBigInt } from "../utils/utils";
 import { asceSwap } from "./asceswapContract";
+import { formatMarket } from "../utils/formatMarket";
 
 export async function getMarket(pairId: string) {
-  return await asceSwap.get_market(pairId);
+  const raw=await asceSwap.get_market(pairId);
+  return formatMarket(raw)
 }
 
 export async function getPoolAnalytics(pairId: string) {
@@ -80,7 +82,7 @@ export async function getTradePreview(
     imbalanceAdjustmentBps: quote.imbalance_adjustment_bps,
     collateralRequired: u256ToBigInt(quote.required_collateral),
     lpCollateralLocked: u256ToBigInt(quote.lp_collateral_to_lock),
-    utilizationCapBps: market.params.max_utilization_bps,
+    utilizationCapBps: market.params.maxUtilizationPct,
   };
 }
 
