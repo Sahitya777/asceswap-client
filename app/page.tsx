@@ -20,7 +20,7 @@ const MARKETS: MarketData[] = [
     name: 'MOCK USDC Supply Yield', 
     oracleRate: 7.22, 
     fixedDuration: Duration.D1,
-    maturityTimestamp: Date.now() + 1000 * 60 * 60 * 23 + 1000 * 60 * 45 // ~23h 45m
+    maturityTimestamp: Date.now() + 1000 * 60 * 60 * 24 * 29 // ~23h 45m
   },
   // { 
   //   id: '2', 

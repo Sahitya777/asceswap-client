@@ -170,7 +170,7 @@ export const LiquidityDialogContent: React.FC<LiquidityDialogContentProps> = ({
               FEE TIER <Activity className="w-2.5 h-2.5 opacity-50" />
             </div>
             <div className="text-2xl font-mono font-bold text-white leading-none">
-              {TOTAL_FEE_PERCENT}%
+              {marketDetails?.params.swapFeePct}%
             </div>
           </div>
           <div className="space-y-1">
@@ -324,14 +324,14 @@ export const LiquidityDialogContent: React.FC<LiquidityDialogContentProps> = ({
             </p>
           </div>
         </div>
-                  {error && <div className="text-red-400 text-xs">{error}</div>}
-          {txHash && (
-            <div className="text-green-400 text-xs break-all">
-              Success
-              <br />
-              {txHash}
-            </div>
-          )}
+        {error && <div className="text-red-400 text-xs">{error}</div>}
+        {txHash && (
+          <div className="text-green-400 text-xs break-all">
+            Success
+            <br />
+            {txHash}
+          </div>
+        )}
         {/* Action Footer */}
         <div className="flex gap-4 pt-2">
           <button
@@ -341,12 +341,19 @@ export const LiquidityDialogContent: React.FC<LiquidityDialogContentProps> = ({
             Cancel
           </button>
           <button
-            className="flex-1 py-5 rounded-2xl font-black uppercase tracking-[0.25em] text-[10px] bg-indigo-600 hover:bg-indigo-500 text-white shadow-2xl shadow-indigo-600/30 transition-all active:scale-95 flex items-center justify-center gap-3 group/btn"
+            className="flex-1 cursor-pointer py-5 rounded-2xl font-black uppercase tracking-[0.25em] text-[10px] bg-indigo-600 hover:bg-indigo-500 text-white shadow-2xl shadow-indigo-600/30 transition-all active:scale-95 flex items-center justify-center gap-3 group/btn
+              disabled:cursor-not-allowed
+  disabled:opacity-50
+  disabled:bg-gray-400
+  disabled:text-gray-700
+  disabled:shadow-none
+            "
+            disabled={amount === 0}
             onClick={() => {
               handleSupply();
             }}
           >
-            {loading?"Providing Liquidity...":"Confirm Deposit"}
+            {loading ? "Providing Liquidity..." : "Confirm Deposit"}
             <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
           </button>
         </div>

@@ -41,6 +41,9 @@ export const SwapDialogContent: React.FC<SwapDialogContentProps> = ({
   const [collateral, setCollateral] = useState(0);
   const { primaryWallet } = useDynamicContext();
   const address = primaryWallet?.address;
+  const [loading, setLoading] = useState(false);
+  const [txHash, setTxHash] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   // Capital efficiency multipliers based on duration
   const efficiencyMultiplier = useMemo(() => {
     switch (duration) {
@@ -154,10 +157,11 @@ export const SwapDialogContent: React.FC<SwapDialogContentProps> = ({
 
   const handleBuy = async () => {
     try {
-      // setLoading(true);
+      setLoading(true);
       const txHash = await approveAndBuySwap({
         tokenAddress: marketDetails?.collateralToken!,
         asceSwapAddress: process.env.NEXT_PUBLIC_ASCESWAP_ADDRESS!,
+        oracleAddress: process.env.NEXT_PUBLIC_ORACLE_ADDRESS!,
         pairId: String(marketDetails?.pairId), // MUST be string
         side: direction,
         notional: notional,
@@ -166,12 +170,12 @@ export const SwapDialogContent: React.FC<SwapDialogContentProps> = ({
         decimals: 6,
       });
 
-      // setTxHash(txHash);
+      setTxHash(txHash);
     } catch (e: any) {
       console.log(e, "supply error");
-      // setError(e.message ?? "Transaction failed");
+      setError(e.message ?? "Transaction failed");
     } finally {
-      // setLoading(false);
+      setLoading(false);
     }
   };
 
@@ -216,7 +220,7 @@ export const SwapDialogContent: React.FC<SwapDialogContentProps> = ({
               Term <Calendar className="w-2.5 h-2.5 opacity-50" />
             </div>
             <div className="text-2xl font-mono font-bold text-white leading-none">
-              {duration}
+              {marketDetails?.params.swapTermDays}Days
             </div>
           </div>
           <div className="space-y-1 group">
@@ -369,26 +373,39 @@ export const SwapDialogContent: React.FC<SwapDialogContentProps> = ({
             </p>
           </div>
         </div>
-
+        {error && <div className="text-red-400 text-xs">{error}</div>}
+        {txHash && (
+          <div className="text-green-400 text-xs break-all">
+            Success
+            <br />
+            {txHash}
+          </div>
+        )}
         {/* Action Footer */}
         <div className="flex gap-4 pt-2">
           <button
             onClick={onClose}
-            className="flex-1 py-5 rounded-2xl font-black uppercase tracking-[0.25em] text-[10px] text-slate-500 hover:text-white hover:bg-white/5 transition-all border border-white/5 active:scale-95"
+            className="flex-1 cursor-pointer py-5 rounded-2xl font-black uppercase tracking-[0.25em] text-[10px] text-slate-500 hover:text-white hover:bg-white/5 transition-all border border-white/5 active:scale-95"
           >
             Cancel
           </button>
           <button
-            className={`flex-1 py-5 rounded-2xl font-black uppercase tracking-[0.25em] text-[10px] shadow-2xl transition-all active:scale-95 flex items-center justify-center gap-3 group/btn ${
-              direction === "FLOATING"
-                ? "bg-[#1de9b6] hover:bg-[#20ffd4] text-black shadow-[#1de9b6]/30"
-                : "bg-[#00e5ff] hover:bg-[#00f3ff] text-black shadow-[#00e5ff]/30"
-            }`}
-            onClick={()=>{
-                handleBuy()
-            }}
+            className={`flex-1 cursor-pointer py-5 rounded-2xl font-black uppercase tracking-[0.25em] text-[10px]
+  shadow-2xl transition-all active:scale-95 flex items-center justify-center gap-3 group/btn
+  disabled:cursor-not-allowed
+  disabled:opacity-50
+  disabled:bg-gray-400
+  disabled:text-gray-700
+  disabled:shadow-none
+  ${
+    direction === "FLOATING"
+      ? "bg-[#1de9b6] hover:bg-[#20ffd4] text-black shadow-[#1de9b6]/30"
+      : "bg-[#00e5ff] hover:bg-[#00f3ff] text-black shadow-[#00e5ff]/30"
+  }`}
+            disabled={collateral === 0}
+            onClick={handleBuy}
           >
-            Execute Swap
+            {loading ? "Executing..." : "Execute Swap"}
             <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
           </button>
         </div>

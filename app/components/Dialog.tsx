@@ -33,7 +33,7 @@ export const Dialog: React.FC<DialogProps> = ({ isOpen, onClose, children }) => 
         {/* Close Button - Positioned absolutely inside the container */}
         <button 
           onClick={onClose}
-          className="absolute top-6 right-8 p-2 text-slate-500 hover:text-white hover:bg-white/5 rounded-full transition-all z-10"
+          className="absolute cursor-pointer top-6 right-8 p-2 text-slate-500 hover:text-white hover:bg-white/5 rounded-full transition-all z-10"
           aria-label="Close dialog"
         >
           <X className="w-5 h-5" />

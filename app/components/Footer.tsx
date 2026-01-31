@@ -122,12 +122,12 @@ export const Footer: React.FC = () => {
             </h4>
             <ul className="space-y-3 text-sm text-slate-500 dark:text-slate-400">
               <li>
-                <a href="#" className="hover:text-brand-500 transition-colors">
+                <a href="/privacy" className="hover:text-brand-500 transition-colors">
                   Privacy
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-brand-500 transition-colors">
+                <a href="/terms" className="hover:text-brand-500 transition-colors">
                   Terms
                 </a>
               </li>

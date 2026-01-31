@@ -1,5 +1,7 @@
 import { uint256 } from "starknet";
 
+/* -------------------- helpers -------------------- */
+
 function toU256ArrayFromDecimal(amount: number, decimals: number): string[] {
   const v = BigInt(Math.round(amount * 10 ** decimals));
   const u = uint256.bnToUint256(v);
@@ -11,9 +13,12 @@ function toU256Array(value: number): string[] {
   return [u.low.toString(), u.high.toString()];
 }
 
+/* -------------------- main -------------------- */
+
 export async function approveAndBuySwap({
   tokenAddress,
   asceSwapAddress,
+  oracleAddress,
   pairId,
   side,
   notional,
@@ -23,13 +28,15 @@ export async function approveAndBuySwap({
 }: {
   tokenAddress: string;
   asceSwapAddress: string;
-  pairId: string;
+  oracleAddress: string;
+  pairId: string; // felt252
   side: "FIXED" | "FLOATING";
   notional: number;
   collateral: number;
   maxRateBps: number;
   decimals: number;
 }) {
+  /* -------- wallet -------- */
   await (window as any).starknet.enable();
   const account = (window as any).starknet.account;
 
@@ -37,14 +44,38 @@ export async function approveAndBuySwap({
     throw new Error("Wallet not connected");
   }
 
+  /* -------- enum (DO NOT TOUCH) -------- */
   const sideValue = side === "FIXED" ? "0" : "1";
 
+  /* -------- amounts -------- */
   const notionalArr = toU256ArrayFromDecimal(notional, decimals);
   const collateralArr = toU256ArrayFromDecimal(collateral, decimals);
-  const maxRateArr = toU256Array(maxRateBps); // 🔥 FIX
+  const maxRateArr = toU256Array(maxRateBps);
 
+  /* -------- 🔥 ORACLE FIX --------
+     IMPORTANT:
+     - NEVER use Date.now()
+     - Use chain timestamp to avoid u64 overflow
+  */
+  const block = await account.getBlock("latest");
+  const chainTimestamp = Number(block.timestamp);
+
+  // Same rate as tests (5% = 500 bps)
+  const oracleRateArr = toU256Array(500);
+
+  /* -------- multicall -------- */
   const calls = [
-    // 1️⃣ approve
+    // 0️⃣ refresh oracle (fixes ORACLE STALE + u64 overflow)
+    {
+      contractAddress: oracleAddress,
+      entrypoint: "set_rate",
+      calldata: [
+        ...oracleRateArr,            // u256 rate
+        chainTimestamp.toString(),   // u64 timestamp (SAFE)
+      ],
+    },
+
+    // 1️⃣ approve collateral
     {
       contractAddress: tokenAddress,
       entrypoint: "approve",
@@ -54,7 +85,7 @@ export async function approveAndBuySwap({
       ],
     },
 
-    // 2️⃣ buy_swap (correct u256 layout)
+    // 2️⃣ buy swap
     {
       contractAddress: asceSwapAddress,
       entrypoint: "buy_swap",
@@ -63,7 +94,7 @@ export async function approveAndBuySwap({
         sideValue,
         ...notionalArr,
         ...collateralArr,
-        ...maxRateArr, // 🔥 THIS FIXES PARAM #5
+        ...maxRateArr,
       ],
     },
   ];
